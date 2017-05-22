@@ -1,0 +1,54 @@
+%Plot the FTs as afunction of time
+%
+%
+%Input information
+%
+intFirstFile = 15;
+intLastFile = 55;
+intWinStep = 5;
+
+FirstFile = int2str(intFirstFile);
+LastFile = int2str(intLastFile);
+WinStep = int2str(intWinStep);
+
+DirName = 'DIRECTORY_HERE\';
+%
+%end input information
+
+fname = [DirName, FirstFile, '_SmoothDiff.dat'];
+
+%take the Y (frequency) data and see how many rows there are
+M = importdata(fname, '\t');
+Y = M;
+Y(:,2) = [];
+NumRow = size(Y, 1);
+
+%create the matrix for the X (time) data and for the Z (height) data to be
+%wrtiten to
+X = 15:5:55;
+columns = size(X, 2);
+Z = zeros(NumRow, columns);
+
+%setup the loop that will add the vectorised Z data in
+intFile = intFirstFile;
+counter = 1;
+%add in the Z data to the Z matrix
+for counter = 1:columns
+    File = int2str(intFile);
+    fname = [DirName, File, '_SmoothDiff.dat'];
+    M = importdata(fname, '\t');
+    M(:,1) = [];
+    intFile = intFile + intWinStep;
+    Z(:,counter) = Z(:,counter) + M;
+    counter = counter + 1;
+end
+
+%Change the mm delay into ps
+X(:,:) = (71.2 - X(:,:))*6.6666666;
+
+%make a surface plot
+surf(X,Y,Z);
+shading interp;
+xlabel('Time delay (ps)')
+ylabel('Frequency (GHz)')
+zlabel('Z')
